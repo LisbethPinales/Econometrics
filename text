@@ -1,0 +1,95 @@
+$$Log (porcentual_womenpart +1) ^2 = β1 + β2 active_men + β3 active_woman + β4porcentual_menpart + u$$
+
+#IMPORTING DB
+library(readxl)
+PART_WOMAN_WORK_MARKET_DR <- read_excel("C:/Users/Lisbeth Pinales/Desktop/Asignaturas S2 2020/Econometria/PART_WOMAN_WORK_MARKET_DR.xls")
+View(PART_WOMAN_WORK_MARKET_DR)
+attach(PART_WOMAN_WORK_MARKET_DR)
+names(PART_WOMAN_WORK_MARKET_DR)
+
+#SECURING NUMERICAL CLASSES
+class(active_women)
+class(active_men)
+class(women_between25to30)
+class(men_between25to30)
+class(porcentual_womenpart)
+class(porcentual_menpart)
+class(PEA)
+PART_WOMAN_WORK_MARKET_DR
+
+``` {r echo=FALSE, message=FALSE, warning=FALSE, comment=" ", include=TRUE, results="asis"}
+MODEL<-lm(log(porcentual_womenpart+1)^2 ~ active_men + active_women + porcentual_menpart, na.action = na.exclude)
+stargazer(MODEL, type = "text")
+summary(MODEL)
+```
+
+
+
+#CALCULING PEARSON CORRELATION
+
+```
+sqrt(1)
+```
+
+#...Según el resultado en la Prueba de Pearson (sqrt = 1), hay una asociación positiva entre las dos variables continuas.
+
+#DESIGNING SCATTER PLOT 
+
+```
+graph1= ggplot(PART_WOMAN_WORK_MARKET_DR, aes(active_men,porcentual_womenpart))
+graph1 + geom_point()
+graph1 + geom_point() + geom_smooth(method = "lm", colour = "Blue")
+
+```
+
+#Heteroscedasticity test & creating waste (spanish. Residuos)
+
+waste <- MODEL$residuals
+yadjusted = MODEL$fitted.values
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, comment=" ", include=TRUE, results="asis"}
+library(ggplot2)
+plot(waste, yadjusted)
+```
+
+
+#Contrast of Brousch Pagan test
+
+$$H0 = Presence of Homoscedasticity$$
+
+$$H1 = Presence of Heteroscedasticity$$
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, comment=" ", include=TRUE, results="asis"}
+library(lmtest)
+bptest(MODEL)
+```
+
+#0.5198 P-Value es mayor que 0.01, por lo tanto no hay Heterocedasticidad
+
+#Dado el resultado de la Prueba Broush Pagar, se refleja presencia de Homocedasticidad en el modelo, por lo que la hipótesis nula se acepta, dado que el p-value es mayor que 0.01. 
+
+#Multicollinearity test
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, comment=" ", include=TRUE, results="asis"}
+library(car)
+vif(MODEL)
+```
+
+
+#Dado el resultado de la Prueba de Multicolinealidad, se refleja que el modelo no contiene errores de colinealidad.
+
+
+#Specification test in functional form; Test Reset Ramsey (1969)
+
+$$H0 = No error of Specification$$
+
+$$H1 = Presence Error of Specification$$
+
+``` {r echo=FALSE, message=FALSE, warning=FALSE, comment=" ", include=TRUE, results="asis"}
+library(lmtest)
+resettest(MODEL, power = 2:2)
+```
+
+#...Dado los resultados,  sí la H0 afirma que todos los coeficientes son igual a 0 se rechaza, por lo tanto, el modelo claramente tiene errores de especificación, se acepta la H1.
